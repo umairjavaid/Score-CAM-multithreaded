@@ -65,6 +65,7 @@ class ScoreCAM(BaseCAM):
       total_scores = total_scores.view(-1)
       return total_scores
       
+    
     def get_cam(self, activations, scores):
       b,f,h,w = activations.shape
       cam = activations*scores[None,:,None,None]
