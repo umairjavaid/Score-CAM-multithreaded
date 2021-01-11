@@ -71,8 +71,15 @@ class ScoreCAM(BaseCAM):
       cam = cam.sum(1, keepdim=True)
       return cam
 
-    def forward(self, imgs, labels=None, retain_graph=False):
-        logits = self.model_arch(input).cuda()
+    def forward(self, imgs, class_idx=None, retain_graph=False):
+        logit = self.model_arch(input).cuda()
+        
+        if class_idx is None:
+            predicted_class = logit.max(1)[-1]
+            score = logit[:, logit.max(1)[-1]].squeeze()
+        else:
+            predicted_class = torch.LongTensor([class_idx])
+            score = logit[:, class_idx].squeeze()
         
         with torch.no_grad():
             batch_size, D, H, W = imgs.shape
@@ -84,7 +91,7 @@ class ScoreCAM(BaseCAM):
             y = F.interpolate(y, (H, W), mode='bilinear', align_corners=False)
             y = self.activation_wise_normalization(y)
             z = self.get_masked_imgs(imgs, y)
-            z = self.get_scores(z, labels)
+            z = self.get_scores(z, class_idx)
             y = self.get_cam(y,z)
             y = F.relu(y)
             y = normalize_tensor(y)
