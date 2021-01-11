@@ -90,3 +90,6 @@ class ScoreCAM(BaseCAM):
             y = normalize_tensor(y)
             y = y.squeeze_(0).detach().clone()
             return y
+    
+    def __call__(self, input, class_idx=None, retain_graph=False):
+        return self.forward(input, class_idx, retain_graph)
